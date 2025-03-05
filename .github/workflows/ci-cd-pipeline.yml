@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Airflow + DBT + Snowflake
 on:
   push:
     branches:
-      - main  # Trigger workflow when pushing to main branch
+      - main  # Trigger workflow on push to main branch
   pull_request:
     branches:
       - main  # Also run for PRs to main
@@ -26,7 +26,7 @@ jobs:
           python -m venv airflow_venv
           source airflow_venv/bin/activate
           pip install --upgrade pip
-          pip install dbt-core dbt-snowflake apache-airflow snowflake-connector-python pandas snowflake-connector-python
+          pip install dbt-core dbt-snowflake apache-airflow snowflake-connector-python pandas
 
       - name: Configure DBT Profile
         run: |
@@ -45,16 +45,17 @@ jobs:
                 threads: 1
             target: dev" > ~/.dbt/profiles.yml
 
-      - name: Run Data Load Script (main.py)
+      - name: Run Data Load Script (`main.py`)
         run: |
           source airflow_venv/bin/activate
-          python airflow_proj/Scripts/main.py  # Ensure this is the correct path
+          python airflow_venv/airflow_proj/Scripts/main.py  # Ensure this is the correct path
 
       - name: Run DBT Models
         run: |
           source airflow_venv/bin/activate
-          cd airflow_proj  # Ensure we're in the DBT project directory
-          dbt run --profiles-dir ~/.dbt
+          cd airflow_venv/airflow_proj  # Move to DBT project directory
+          dbt run --models DEV_LAYER
+          dbt run --models PROD_LAYER 
 
       - name: Deploy Airflow DAGs
         run: |
