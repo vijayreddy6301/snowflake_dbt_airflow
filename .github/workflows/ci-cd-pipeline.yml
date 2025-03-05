@@ -1,0 +1,69 @@
+name: CI/CD Pipeline for Airflow + DBT + Snowflake
+
+on:
+  push:
+    branches:
+      - main  # Trigger workflow when pushing to main branch
+  pull_request:
+    branches:
+      - main  # Also run for PRs to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'  # Use your Python version
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install dbt-core dbt-snowflake apache-airflow snowflake-connector-python
+
+      - name: Configure DBT Profile
+        run: |
+          mkdir -p ~/.dbt
+          echo "airflow_proj:
+            outputs:
+              dev:
+                type: snowflake
+                account: mn92153.ap-southeast-1
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ACCOUNTADMIN
+                database: PANDAS
+                warehouse: COMPUTE_WH
+                schema: DEV_LAYER
+                threads: 1
+            target: dev" > ~/.dbt/profiles.yml
+
+      - name: Run DBT Models
+        run: |
+          source venv/bin/activate
+          dbt run --profiles-dir ~/.dbt
+
+      - name: Deploy Airflow DAGs
+        run: |
+          mkdir -p $AIRFLOW_HOME/dags
+          cp -r airflow_dags/* $AIRFLOW_HOME/dags/
+          airflow db upgrade
+          airflow dags list
+
+      - name: Restart Airflow
+        run: |
+          pkill -f "airflow scheduler" || true
+          pkill -f "airflow webserver" || true
+          airflow scheduler & airflow webserver -p 8080 &
+
+      - name: Verify Deployment
+        run: |
+          airflow dags list
+          dbt test --profiles-dir ~/.dbt
