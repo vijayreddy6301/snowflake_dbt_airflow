@@ -47,9 +47,10 @@ jobs:
 
       - name: Run Data Load Script (`main.py`)
         run: |
-          source airflow_venv/bin/activate
-          python airflow_proj/Scripts/main.py
-           # Ensure this is the correct path
+          
+          airflow_venv/bin/python airflow_proj/Scripts/main.py
+
+
 
       - name: Run DBT Models
         run: |
