@@ -16,7 +16,7 @@ default_args = {
 with DAG(
     'load_and_dbt_dag',
     default_args=default_args,
-    schedule_interval=None,  # Manual trigger
+    schedule=None,  # Manual trigger
     catchup=False,
 ) as dag:
 
@@ -31,7 +31,7 @@ with DAG(
     # Task 2: Run dbt models
     run_dbt_models = BashOperator(
         task_id='run_dbt_models',
-        bash_command='/home/hp/airflow_venv/bin/dbt run',
+        bash_command='/home/hp/airflow_venv/bin/dbt run --models DEV_LAYER && dbt run --models PROD_LAYER --target prod ',
         cwd='/home/hp/airflow_venv/airflow_proj'
     )
 
