@@ -48,7 +48,7 @@ jobs:
       - name: Run Data Load Script (`main.py`)
         run: |
           
-          airflow_venv/bin/python airflow_proj/Scripts/main.py
+          source /home/hp/airflow_venv/bin/activate && python /home/hp/airflow_venv/airflow_proj/Scripts/main.py
 
 
 
