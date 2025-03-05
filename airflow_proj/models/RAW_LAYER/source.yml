@@ -1,0 +1,33 @@
+sources:
+  - name: RAW_LAYER
+    schema: RAW_LAYER
+    description: Raw data loaded from the csv containing order data - fact table
+            
+    tables:
+      - name: CUSTOMER_TABLE
+        columns:
+          - name: index
+            data_type: int
+          - name: customer_id
+            data_type: varchar
+          - name: first_name
+            data_type: varchar
+          - name: last_name
+            data_type: varchar
+          - name: company
+            data_type: varchar
+          - name: city
+            data_type: varchar
+          - name: country
+            data_type: varchar
+          - name: phone_1
+            data_type: varchar
+          - name: phone_2
+            data_type: varchar
+          - name: email
+            data_type: varchar
+          - name: subscription_date
+            data_type: varchar
+          - name: website
+            data_type: varchar
+        

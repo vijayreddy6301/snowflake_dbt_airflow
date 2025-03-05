@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: Dim_customer
+    description: "The table contains the silver layer of dimension customer"
+    config:
+      contract:
+        enforced: false
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ["customer_id"]
+
+    columns:
+      - name: customer_id
+        data_type: varchar
+        description: "Unique identifier for the customer"
+        tests:
+          - unique
+          - not_null
+
+      - name: index
+        data_type: int
+        description: "Index field for the customer"
+        tests:
+          - not_null
+
+      - name: first_name
+        data_type: varchar
+        description: "First name of the customer"
+        tests:
+          - not_null
+
+      - name: last_name
+        data_type: varchar
+        description: "Last name of the customer"
+        tests:
+          - not_null
+
+      - name: company
+        data_type: varchar
+        description: "Company the customer is associated with"
+        tests:
+          - not_null
+
+      - name: city
+        data_type: varchar
+        description: "City where the customer is located"
+        tests:
+          - not_null
+
+      - name: country
+        data_type: varchar
+        description: "Country where the customer resides"
+        tests:
+          - not_null
+
+      - name: phone_1
+        data_type: varchar
+        description: "Primary phone number of the customer"
+        tests:
+          - not_null
+
+      - name: phone_2
+        data_type: varchar
+        description: "Secondary phone number of the customer (optional)"
+
+      - name: email
+        data_type: varchar
+        description: "Email address of the customer"
+        tests:
+          - not_null
+          - unique
+
+      - name: subscription_date
+        data_type: date
+        description: "Date the customer subscribed"
+
+      - name: website
+        data_type: TEXT
+        description: "Website URL associated with the customer"

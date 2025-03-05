@@ -1,0 +1,7 @@
+sources:
+  - name: DEV_LAYER
+    schema: DEV_LAYER
+    description: Raw data loaded from the csv containing order data - fact table
+            
+    tables:
+      - name: DIM_CUSTOMER
