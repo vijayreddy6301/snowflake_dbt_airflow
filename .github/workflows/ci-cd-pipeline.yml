@@ -47,8 +47,10 @@ jobs:
 
       - name: Run DBT Models
         run: |
-          source venv/bin/activate
+          source airflow_venv/bin/activate
+          cd airflow_proj  # Move into the DBT project directory
           dbt run --profiles-dir ~/.dbt
+
 
       - name: Deploy Airflow DAGs
         run: |
