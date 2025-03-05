@@ -21,12 +21,12 @@ jobs:
         with:
           python-version: '3.12'  # Use your Python version
 
-      - name: Install Dependencies
+      - name: Create and Activate Virtual Environment
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m venv airflow_venv
+          source airflow_venv/bin/activate
           pip install --upgrade pip
-          pip install dbt-core dbt-snowflake apache-airflow snowflake-connector-python
+          pip install dbt-core dbt-snowflake apache-airflow snowflake-connector-python pandas snowflake-connector-python
 
       - name: Configure DBT Profile
         run: |
@@ -45,27 +45,34 @@ jobs:
                 threads: 1
             target: dev" > ~/.dbt/profiles.yml
 
+      - name: Run Data Load Script (main.py)
+        run: |
+          source airflow_venv/bin/activate
+          python airflow_proj/Scripts/main.py  # Ensure this is the correct path
+
       - name: Run DBT Models
         run: |
           source airflow_venv/bin/activate
-          cd airflow_proj  # Move into the DBT project directory
+          cd airflow_proj  # Ensure we're in the DBT project directory
           dbt run --profiles-dir ~/.dbt
-
 
       - name: Deploy Airflow DAGs
         run: |
-          mkdir -p $AIRFLOW_HOME/dags
-          cp -r airflow_dags/* $AIRFLOW_HOME/dags/
+          mkdir -p ~/airflow/dags
+          cp -r airflow_dags/* ~/airflow/dags/
           airflow db upgrade
           airflow dags list
 
-      - name: Restart Airflow
+      - name: Start Airflow Services
         run: |
-          pkill -f "airflow scheduler" || true
-          pkill -f "airflow webserver" || true
-          airflow scheduler & airflow webserver -p 8080 &
+          source airflow_venv/bin/activate
+          nohup airflow scheduler > ~/airflow/scheduler.log 2>&1 &
+          nohup airflow webserver -p 8080 > ~/airflow/webserver.log 2>&1 &
+          sleep 10  # Give some time for services to start
+          airflow dags list
 
       - name: Verify Deployment
         run: |
+          source airflow_venv/bin/activate
           airflow dags list
           dbt test --profiles-dir ~/.dbt
